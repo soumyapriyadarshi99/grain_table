@@ -22,103 +22,141 @@ const style = {
 
 const AddGrainModal = ({
   isShow,
-  handleClose = () => null,
-  handleAdd = () => null,
+  handleClose,
+  handleAdd,
+  rowDetails = {},
+  isEdit = false,
 }) => {
   const [grainDetails, setGrainDetails] = useState({
-    startDate: "",
-    endDate: "",
-    cropYear: "",
-    price: 0,
+    id: rowDetails?.id || null,
+    startDate: rowDetails?.startDate ? dayjs(rowDetails.startDate) : null,
+    endDate: rowDetails?.endDate ? dayjs(rowDetails.endDate) : null,
+    cropYear: rowDetails?.cropYear
+      ? dayjs(`${rowDetails.cropYear}-01-01`)
+      : null,
+    price: rowDetails?.price || "",
   });
 
+  const handleResetState = () => {
+    setGrainDetails({
+      startDate: null,
+      endDate: null,
+      cropYear: null,
+      price: "",
+      id: "",
+    });
+  };
+
+  useEffect(() => {
+    if (isEdit) {
+      setGrainDetails({
+        id: rowDetails?.id || null,
+        startDate: rowDetails?.startDate ? dayjs(rowDetails.startDate) : null,
+        endDate: rowDetails?.endDate ? dayjs(rowDetails.endDate) : null,
+        cropYear: rowDetails?.cropYear
+          ? dayjs(`${rowDetails.cropYear}-01-01`)
+          : null,
+        price: rowDetails?.price || "",
+      });
+    } else {
+      handleResetState();
+    }
+  }, [rowDetails, isEdit]);
+
   return (
-    <div>
-      <Modal
-        open={isShow}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h6" sx={{ mb: 2 }}>
-            Add Grain
-          </Typography>
+    <Modal
+      open={isShow}
+      onClose={() => handleClose("ADD")}
+      aria-labelledby="modal-modal-title"
+      aria-describedby="modal-modal-description"
+    >
+      <Box sx={style}>
+        <Typography id="modal-modal-title" variant="h6" sx={{ mb: 2 }}>
+          {isEdit ? "Edit Grain" : "Add Grain"}
+        </Typography>
 
-          <DatePicker
-            value={dayjs(grainDetails?.startDate)}
-            onChange={(val) =>
-              setGrainDetails({ ...grainDetails, startDate: val })
-            }
-            label="Contract Start Date"
-            sx={{ mb: 2, width: "100%" }}
-          />
+        <DatePicker
+          value={grainDetails.startDate}
+          onChange={(val) =>
+            setGrainDetails({ ...grainDetails, startDate: val || null })
+          }
+          label="Contract Start Date"
+          sx={{ mb: 2, width: "100%" }}
+        />
 
-          <DatePicker
-            value={dayjs(grainDetails?.endDate)}
-            onChange={(val) =>
-              setGrainDetails({ ...grainDetails, endDate: val })
-            }
-            label="Contract End Date"
-            sx={{ mb: 2, width: "100%" }}
-          />
+        <DatePicker
+          value={grainDetails.endDate}
+          onChange={(val) =>
+            setGrainDetails({ ...grainDetails, endDate: val || null })
+          }
+          label="Contract End Date"
+          sx={{ mb: 2, width: "100%" }}
+        />
 
-          <DatePicker
-            views={["year"]}
-            value={dayjs(grainDetails?.cropYear)}
-            onChange={(val) =>
-              setGrainDetails({ ...grainDetails, cropYear: val })
-            }
-            label="Crop Year"
-            sx={{ mb: 2, width: "100%" }}
-          />
+        <DatePicker
+          views={["year"]}
+          value={grainDetails.cropYear}
+          onChange={(val) =>
+            setGrainDetails({
+              ...grainDetails,
+              cropYear: val ? dayjs(`${val.year()}-01-01`) : null,
+            })
+          }
+          label="Crop Year"
+          sx={{ mb: 2, width: "100%" }}
+        />
 
-          <TextField
-            id="outlined-basic"
-            label="Price"
+        <TextField
+          id="outlined-basic"
+          label="Price"
+          variant="outlined"
+          sx={{ mb: 2, width: "100%" }}
+          value={grainDetails.price}
+          type="number"
+          onChange={(e) =>
+            setGrainDetails({ ...grainDetails, price: e.target.value })
+          }
+        />
+
+        <Box sx={{ mt: 4, display: "flex", justifyContent: "flex-end" }}>
+          <Button
             variant="outlined"
-            sx={{ mb: 2, width: "100%" }}
-            value={grainDetails?.price}
-            type="number"
-            onChange={(e) =>
-              setGrainDetails({ ...grainDetails, price: e?.target?.value })
+            sx={{ mr: 1 }}
+            color="success"
+            onClick={() => {
+              handleResetState();
+              handleClose("ADD");
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            disabled={
+              !grainDetails.startDate ||
+              !grainDetails.endDate ||
+              !grainDetails.cropYear ||
+              !grainDetails.price
             }
-          />
-
-          <Box sx={{ mt: 4, display: "flex", justifyContent: "flex-end" }}>
-            <Button
-              variant="outlined"
-              sx={{ mr: 1 }}
-              color="success"
-              onClick={() => {
-                setGrainDetails({
+            color="success"
+            onClick={() => {
+              handleAdd(
+                {
                   ...grainDetails,
-                  startDate: "",
-                  endDate: "",
-                  cropYear: "",
-                  price: 0,
-                });
-                handleClose("ADD");
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              disabled={
-                !grainDetails.startDate ||
-                !grainDetails.endDate ||
-                !grainDetails.cropYear ||
-                !grainDetails.price
-              }
-              color="success"
-              onClick={() => handleAdd(grainDetails)}
-            >
-              Save
-            </Button>
-          </Box>
+                  startDate: grainDetails.startDate?.format(),
+                  endDate: grainDetails.endDate?.format(),
+                  cropYear: grainDetails.cropYear?.year(),
+                },
+                isEdit
+              );
+              handleResetState();
+            }}
+          >
+            Save
+          </Button>
         </Box>
-      </Modal>
-    </div>
+      </Box>
+    </Modal>
   );
 };
 

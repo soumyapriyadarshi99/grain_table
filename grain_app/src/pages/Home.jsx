@@ -23,43 +23,44 @@ const Home = () => {
   const grainData = useSelector((state) => state?.grains?.data);
 
   const [selectedRow, setSelectedRow] = useState(null);
+  const [editing, setEditing] = useState(false);
 
   const [openAddModal, setOpenAddModal] = useState(false);
-  const [openEditModal, setOpenEditModal] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
-  const handleAdd = (grainDetails) => {
+  const handleAdd = (grainDetails, isEdit) => {
     const payload = {
       ...grainDetails,
-      id: uuidv4(), // Generate a unique string ID,
-      startDate: grainDetails?.startDate
-        ? dayjs(grainDetails.startDate).format()
-        : null,
-      endDate: grainDetails?.endDate
-        ? dayjs(grainDetails.endDate).format()
-        : null,
-      cropYear: dayjs(grainDetails?.cropYear).year(),
+      id: isEdit ? grainDetails.id : uuidv4(),
+      startDate: grainDetails.startDate,
+      endDate: grainDetails.endDate,
+      cropYear: grainDetails.cropYear,
     };
-    dispatch(addGrain(payload));
-    handleOpenModal("ADD");
-  };
-
-  const handleEdit = () => {
-    handleOpenModal("EDIT");
+    console.log(payload, isEdit, "isEdit");
+    if (isEdit) {
+      dispatch(editGrain(payload));
+    } else {
+      dispatch(addGrain(payload));
+    }
+    setOpenAddModal(false);
+    setEditing(false);
+    setSelectedRow(null);
   };
 
   const handleDelete = () => {
-    dispatch(removeGrain(selectedRow));
-    handleOpenModal("DELETE");
+    if (selectedRow) {
+      dispatch(removeGrain({ id: selectedRow.id }));
+      setSelectedRow(null);
+      setOpenDeleteModal(false);
+    }
   };
 
-  const handleOpenModal = (modalType) => {
+  const handleOpenModal = (modalType, isEdit = false) => {
     if (modalType === "ADD") {
-      setOpenAddModal((openAddModal) => !openAddModal);
-    } else if (modalType === "EDIT") {
-      setOpenEditModal((openEditModal) => !openEditModal);
+      setOpenAddModal(true);
+      setEditing(isEdit);
     } else if (modalType === "DELETE") {
-      setOpenDeleteModal((openDeleteModal) => !openDeleteModal);
+      setOpenDeleteModal(true);
     }
   };
 
@@ -109,7 +110,14 @@ const Home = () => {
                 <TableCell align="right">{row?.cropYear}</TableCell>
                 <TableCell align="right">{row?.price}</TableCell>
                 <TableCell align="right">
-                  <EditIcon sx={{ cursor: "pointer" }} />
+                  <EditIcon
+                    sx={{ cursor: "pointer", color: "grey" }}
+                    onClick={() => {
+                      setSelectedRow(row);
+                      setEditing(true);
+                      handleOpenModal("ADD", true);
+                    }}
+                  />
                 </TableCell>
                 <TableCell align="right">
                   <DeleteIcon
@@ -134,6 +142,8 @@ const Home = () => {
         isShow={openAddModal}
         handleClose={handleOpenModal}
         handleAdd={handleAdd}
+        rowDetails={selectedRow}
+        isEdit={editing}
       />
       <DeleteGrainMdal
         isShow={openDeleteModal}
