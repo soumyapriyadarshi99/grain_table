@@ -57,10 +57,10 @@ const Home = () => {
 
   const handleOpenModal = (modalType, isEdit = false) => {
     if (modalType === "ADD") {
-      setOpenAddModal(true);
+      setOpenAddModal((val) => !val);
       setEditing(isEdit);
     } else if (modalType === "DELETE") {
-      setOpenDeleteModal(true);
+      setOpenDeleteModal((val) => !val);
     }
   };
 
