@@ -6,7 +6,6 @@ import { Box, Modal, TextField } from "@mui/material";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { YearCalendar } from "@mui/x-date-pickers/YearCalendar";
 import dayjs from "dayjs";
 
 const style = {
@@ -89,6 +88,7 @@ const AddGrainModal = ({
             <Button
               variant="outlined"
               sx={{ mr: 1 }}
+              color="success"
               onClick={() => {
                 setGrainDetails({
                   ...grainDetails,
@@ -110,6 +110,7 @@ const AddGrainModal = ({
                 !grainDetails.cropYear ||
                 !grainDetails.price
               }
+              color="success"
               onClick={() => handleAdd(grainDetails)}
             >
               Save

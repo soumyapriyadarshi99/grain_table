@@ -12,12 +12,17 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { Button } from "@mui/material";
+import { Button, colors, Typography } from "@mui/material";
 import AddGrainModal from "../components/AddGrainModal";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteGrainMdal from "../components/DeleteGrainMdal";
 
 const Home = () => {
   const dispatch = useDispatch();
   const grainData = useSelector((state) => state?.grains?.data);
+
+  const [selectedRow, setSelectedRow] = useState(null);
 
   const [openAddModal, setOpenAddModal] = useState(false);
   const [openEditModal, setOpenEditModal] = useState(false);
@@ -35,17 +40,17 @@ const Home = () => {
         : null,
       cropYear: dayjs(grainDetails?.cropYear).year(),
     };
-    console.log(payload, "payload");
     dispatch(addGrain(payload));
-    setOpenAddModal((openAddModal) => !openAddModal);
+    handleOpenModal("ADD");
   };
 
   const handleEdit = () => {
-    setOpenAddModal((openEditModal) => !openEditModal);
+    handleOpenModal("EDIT");
   };
 
   const handleDelete = () => {
-    setOpenAddModal((openDeleteModal) => !openDeleteModal);
+    dispatch(removeGrain(selectedRow));
+    handleOpenModal("DELETE");
   };
 
   const handleOpenModal = (modalType) => {
@@ -93,21 +98,47 @@ const Home = () => {
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
               >
                 <TableCell component="th" scope="row">
-                  {new Date(row?.startDate).getDate()}
+                  {`${
+                    row?.startDate
+                      ? dayjs(row.startDate).format("MMM YY")
+                      : "N/A"
+                  } - ${
+                    row?.startDate ? dayjs(row.endDate).format("MMM YY") : "N/A"
+                  }`}
                 </TableCell>
                 <TableCell align="right">{row?.cropYear}</TableCell>
                 <TableCell align="right">{row?.price}</TableCell>
-                <TableCell align="right">Edit</TableCell>
-                <TableCell align="right">Delete</TableCell>
+                <TableCell align="right">
+                  <EditIcon sx={{ cursor: "pointer" }} />
+                </TableCell>
+                <TableCell align="right">
+                  <DeleteIcon
+                    sx={{ cursor: "pointer", color: "#da312e" }}
+                    onClick={() => {
+                      setSelectedRow(row);
+                      handleOpenModal("DELETE");
+                    }}
+                  />
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
+      {grainData?.length === 0 && (
+        <Typography sx={{ textAlign: "center" }}>
+          <h4>No data to display</h4>
+        </Typography>
+      )}
       <AddGrainModal
         isShow={openAddModal}
         handleClose={handleOpenModal}
         handleAdd={handleAdd}
+      />
+      <DeleteGrainMdal
+        isShow={openDeleteModal}
+        handleClose={handleOpenModal}
+        handleDelete={handleDelete}
       />
     </div>
   );

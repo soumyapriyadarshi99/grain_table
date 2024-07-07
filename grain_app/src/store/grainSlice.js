@@ -28,7 +28,6 @@ export const grainSlice = createSlice({
   },
 });
 
-// Action creators are generated for each case reducer function
 export const { addGrain, removeGrain, editGrain } = grainSlice.actions;
 
 export default grainSlice.reducer;
